@@ -49,8 +49,8 @@ async def chat(request: QueryRequest):
         
         if final_output.get("final_answer"):
              return QueryResponse(
-                 answer=final_output["final_answer"], 
-                 query_executed=final_output.get("sql_query", "")
+                  answer=final_output["final_answer"], 
+                  query_executed=final_output.get("sql_query", "")
              )
         elif final_output.get("error_count", 0) >= 3:
              return QueryResponse(answer="Agent stopped after multiple failed attempts to generate or execute valid SQL.")
@@ -59,7 +59,8 @@ async def chat(request: QueryRequest):
              
     except Exception as e:
          error_msg = str(e)
-         if "rate_limit_exceeded" in error_msg or "429" in error_msg:
-             return QueryResponse(answer=f"Groq Free Tier Rate Limit Exceeded. Please wait a minute and try again.\\n\\nDetails: {error_msg}")
+         # Cleanly handle Groq rate limits for the user
+         if any(keyword in error_msg.lower() for keyword in ["rate_limit", "429", "too many requests"]):
+             return QueryResponse(answer="Groq Rate Limit Exceeded. The free tier allows limited requests per minute. Please wait 60 seconds and try again.")
              
-         raise HTTPException(status_code=500, detail=error_msg)
+         raise HTTPException(status_code=500, detail=f"Internal Agent Error: {error_msg}")

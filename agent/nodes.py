@@ -6,8 +6,8 @@ from agent.state import AgentState
 from utils.database import get_db_schema, execute_sql_query
 
 # Initialize Groq LLM (100% free and lightning fast cloud API)
-# Llama 3.3 70b gives great SQL accuracy
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+# Llama 3.1 8b is very fast and has higher rate limits for free tier
+llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0, request_timeout=30.0)
 
 def extract_sql_query(text: str) -> str:
     """Helper to extract SQL query from markdown backticks if present."""
